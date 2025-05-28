@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unsubscribe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* For loading spinner */
+        .loader {
+            border-top-color: #3498db;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center min-h-screen p-6 text-slate-100">
+    <div class="bg-slate-800 shadow-2xl rounded-xl p-8 md:p-12 w-full max-w-lg transform transition-all duration-500 ease-in-out">
+        <div id="initialView">
+            <div class="text-center mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-sky-400 mb-4">
+                    <path d="M22 10.5V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h12.5"/>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    <path d="m16 19-3-3-3 3"/>
+                    <path d="m19 16-3-3-3 3"/>
+                </svg>
+                <h1 class="text-3xl font-bold text-slate-100">Unsubscribe</h1>
+                <p class="text-slate-400 mt-2" id="subHeaderText">We're sorry to see you go.</p>
+            </div>
+
+            <div id="emailFromUrlView" class="hidden">
+                <div class="mb-6 text-center">
+                    <p class="text-slate-300">Are you sure you want to unsubscribe the following email address?</p>
+                    <p id="emailDisplay" class="text-sky-400 font-semibold text-lg mt-2 break-all">Loading email...</p>
+                </div>
+                <button id="unsubscribeButtonUrl" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75">
+                    Yes, Unsubscribe Me
+                </button>
+            </div>
+
+            <div id="emailInputView" class="hidden">
+                <p class="text-slate-300 mb-4 text-center">Please enter the email address you wish to unsubscribe:</p>
+                <input type="email" id="emailInput" placeholder="Enter your email address" class="w-full px-4 py-3 mb-4 bg-slate-700 border border-slate-600 text-slate-100 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-colors duration-200">
+                <button id="unsubscribeButtonInput" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75">
+                    Unsubscribe Email
+                </button>
+                 <p id="inputErrorMessage" class="text-center text-red-400 mt-3 text-sm"></p>
+            </div>
+             <p id="missingEmailMessage" class="text-center text-amber-400 mt-4 hidden">
+                If you continue to have issues, please contact support.
+            </p>
+        </div>
+
+        <div id="feedbackView" class="hidden text-center">
+            <div id="loadingState" class="hidden">
+                <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-500 h-12 w-12 mb-4 mx-auto"></div>
+                <p class="text-slate-300 text-lg">Processing your request...</p>
+            </div>
+            <div id="successState" class="hidden">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-green-400 mb-4"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <h2 class="text-2xl font-semibold text-green-400 mb-2">Successfully Unsubscribed!</h2>
+                <p class="text-slate-300">You will no longer receive emails from us at <span id="unsubscribedEmailDisplay" class="font-semibold text-green-300"></span>.</p>
+                <p class="text-slate-400 mt-1 text-sm">It may take a few moments for our systems to update.</p>
+            </div>
+            <div id="errorState" class="hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-red-400 mb-4"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <h2 class="text-2xl font-semibold text-red-400 mb-2">Oops! Something went wrong.</h2>
+                <p class="text-slate-300">We couldn't process your unsubscribe request at this time. Please try again later or contact support if the issue persists.</p>
+                <p id="errorMessage" class="text-red-300 text-sm mt-2"></p>
+                <button onclick="window.location.reload()" class="mt-6 bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                    Try Again
+                </button>
+            </div>
+        </div>
+         <p class="text-center text-xs text-slate-500 mt-10">
+            If you unsubscribed by mistake, you can resubscribe by visiting our website.
+        </p>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyAfFrYXdOcIMj8Xyftv83xjV-z3T9TVbk9ZN_WOP9Oau5PsqbLNeNcFJD6CIhcR0Y/exec';
+
+        const emailDisplay = document.getElementById('emailDisplay');
+        const unsubscribedEmailDisplay = document.getElementById('unsubscribedEmailDisplay');
+        
+        const unsubscribeButtonUrl = document.getElementById('unsubscribeButtonUrl');
+        const unsubscribeButtonInput = document.getElementById('unsubscribeButtonInput');
+        
+        const emailInput = document.getElementById('emailInput');
+        const inputErrorMessage = document.getElementById('inputErrorMessage');
+
+        const initialView = document.getElementById('initialView');
+        const emailFromUrlView = document.getElementById('emailFromUrlView');
+        const emailInputView = document.getElementById('emailInputView');
+        
+        const feedbackView = document.getElementById('feedbackView');
+        const loadingState = document.getElementById('loadingState');
+        const successState = document.getElementById('successState');
+        const errorState = document.getElementById('errorState');
+        const errorMessage = document.getElementById('errorMessage');
+        const missingEmailMessage = document.getElementById('missingEmailMessage');
+        const subHeaderText = document.getElementById('subHeaderText');
+
+
+        let currentEmailToUnsubscribe = '';
+
+        // Function to get URL parameters
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Function to validate email
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Main function to handle unsubscribe logic
+        async function processUnsubscribe(email) {
+            if (!email) {
+                // This case should ideally be handled by UI logic before calling this function
+                console.error('No email provided to processUnsubscribe');
+                showErrorState('Email address is missing.');
+                return;
+            }
+
+            currentEmailToUnsubscribe = email; // Store for display on success/error
+
+            // Show loading state
+            initialView.classList.add('hidden');
+            feedbackView.classList.remove('hidden');
+            loadingState.classList.remove('hidden');
+            successState.classList.add('hidden');
+            errorState.classList.add('hidden');
+
+            try {
+                const formData = new FormData();
+                formData.append('email', email);
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors', 
+                    body: new URLSearchParams(formData)
+                });
+
+                if (!response.ok) {
+                    let errorDetails = `HTTP error! status: ${response.status}`;
+                    try {
+                        const errorResult = await response.json();
+                        errorDetails = errorResult.message || errorResult.error || errorDetails;
+                    } catch (e) { /* Ignore if response is not JSON */ }
+                    throw new Error(errorDetails);
+                }
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    loadingState.classList.add('hidden');
+                    successState.classList.remove('hidden');
+                    unsubscribedEmailDisplay.textContent = currentEmailToUnsubscribe;
+                } else {
+                    throw new Error(result.message || 'An unknown error occurred during unsubscribe.');
+                }
+
+            } catch (error) {
+                console.error('Unsubscribe error:', error);
+                showErrorState(error.message || 'Failed to connect to the unsubscribe service.');
+            }
+        }
+        
+        function showErrorState(message) {
+            loadingState.classList.add('hidden');
+            successState.classList.add('hidden');
+            errorState.classList.remove('hidden');
+            errorMessage.textContent = message;
+            if (currentEmailToUnsubscribe) { // If we know the email, show it
+                 unsubscribedEmailDisplay.textContent = currentEmailToUnsubscribe; // Re-use this span for context
+            }
+        }
+
+
+        // On page load
+        window.onload = () => {
+            const emailFromQuery = getQueryParam('email');
+            if (emailFromQuery) {
+                currentEmailToUnsubscribe = emailFromQuery;
+                emailDisplay.textContent = currentEmailToUnsubscribe;
+                emailFromUrlView.classList.remove('hidden');
+                emailInputView.classList.add('hidden');
+                missingEmailMessage.classList.add('hidden');
+            } else {
+                // No email in URL, show input field
+                emailFromUrlView.classList.add('hidden');
+                emailInputView.classList.remove('hidden');
+                subHeaderText.textContent = "Manage your email subscription."; // Change subheader
+                missingEmailMessage.classList.remove('hidden'); // Show the generic support message
+            }
+        };
+
+        // Event listener for the button when email is from URL
+        if(unsubscribeButtonUrl) {
+            unsubscribeButtonUrl.addEventListener('click', () => {
+                if (currentEmailToUnsubscribe) {
+                    processUnsubscribe(currentEmailToUnsubscribe);
+                } else {
+                    // Should not happen if UI logic is correct
+                    console.error("Attempted to unsubscribe via URL button without an email.");
+                    showErrorState("Could not find an email to unsubscribe. Please try again or use the input field.");
+                }
+            });
+        }
+
+        // Event listener for the button when email is from input
+        if(unsubscribeButtonInput) {
+            unsubscribeButtonInput.addEventListener('click', () => {
+                const email = emailInput.value.trim();
+                inputErrorMessage.textContent = ''; // Clear previous error
+
+                if (!email) {
+                    inputErrorMessage.textContent = 'Please enter an email address.';
+                    emailInput.focus();
+                    return;
+                }
+                if (!isValidEmail(email)) {
+                    inputErrorMessage.textContent = 'Please enter a valid email address.';
+                    emailInput.focus();
+                    return;
+                }
+                processUnsubscribe(email);
+            });
+        }
+    </script>
+</body>
+</html>
