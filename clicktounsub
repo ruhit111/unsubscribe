@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unsubscribe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* For loading spinner */
+        .loader {
+            border-top-color: #3498db;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center min-h-screen p-6 text-slate-100">
+    <div class="bg-slate-800 shadow-2xl rounded-xl p-8 md:p-12 w-full max-w-lg transform transition-all duration-500 ease-in-out">
+        <div id="initialView">
+            <div class="text-center mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-sky-400 mb-4">
+                    <path d="M22 10.5V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h12.5"/>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    <path d="m16 19-3-3-3 3"/>
+                    <path d="m19 16-3-3-3 3"/>
+                </svg>
+                <h1 class="text-3xl font-bold text-slate-100">Unsubscribe</h1>
+                <p class="text-slate-400 mt-2">We're sorry to see you go.</p>
+            </div>
+
+            <div class="mb-6 text-center">
+                <p class="text-slate-300">Are you sure you want to unsubscribe the following email address?</p>
+                <p id="emailDisplay" class="text-sky-400 font-semibold text-lg mt-2 break-all">Loading email...</p>
+            </div>
+
+            <div id="actionButtonContainer">
+                 <button id="unsubscribeButton" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75">
+                    Yes, Unsubscribe Me
+                </button>
+            </div>
+             <p id="missingEmailMessage" class="text-center text-amber-400 mt-4 hidden">
+                It seems you've reached this page directly. Please use the unsubscribe link from your email. If you continue to have issues, please contact support.
+            </p>
+        </div>
+
+        <div id="feedbackView" class="hidden text-center">
+            <div id="loadingState" class="hidden">
+                <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-500 h-12 w-12 mb-4 mx-auto"></div>
+                <p class="text-slate-300 text-lg">Processing your request...</p>
+            </div>
+            <div id="successState" class="hidden">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-green-400 mb-4"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <h2 class="text-2xl font-semibold text-green-400 mb-2">Successfully Unsubscribed!</h2>
+                <p class="text-slate-300">You will no longer receive emails from us at <span id="unsubscribedEmailDisplay" class="font-semibold text-green-300"></span>.</p>
+                <p class="text-slate-400 mt-1 text-sm">It may take a few moments for our systems to update.</p>
+            </div>
+            <div id="errorState" class="hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-red-400 mb-4"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <h2 class="text-2xl font-semibold text-red-400 mb-2">Oops! Something went wrong.</h2>
+                <p class="text-slate-300">We couldn't process your unsubscribe request at this time. Please try again later or contact support if the issue persists.</p>
+                <p id="errorMessage" class="text-red-300 text-sm mt-2"></p>
+                <button onclick="window.location.reload()" class="mt-6 bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                    Try Again
+                </button>
+            </div>
+        </div>
+         <p class="text-center text-xs text-slate-500 mt-10">
+            If you unsubscribed by mistake, you can resubscribe by visiting our website.
+        </p>
+    </div>
+
+    <script>
+        // IMPORTANT: Replace this with your actual Google Apps Script Web App URL
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw7gE6mtqx3gQ0nkqg5gT8AgyQsae5yU9mjAlZyYKtSr-2dmI1iodKZMApjN1yoNYSr/exec';
+
+        const emailDisplay = document.getElementById('emailDisplay');
+        const unsubscribedEmailDisplay = document.getElementById('unsubscribedEmailDisplay');
+        const unsubscribeButton = document.getElementById('unsubscribeButton');
+        const actionButtonContainer = document.getElementById('actionButtonContainer');
+        const missingEmailMessage = document.getElementById('missingEmailMessage');
+        
+        const initialView = document.getElementById('initialView');
+        const feedbackView = document.getElementById('feedbackView');
+        const loadingState = document.getElementById('loadingState');
+        const successState = document.getElementById('successState');
+        const errorState = document.getElementById('errorState');
+        const errorMessage = document.getElementById('errorMessage');
+
+        let userEmail = '';
+
+        // Function to get URL parameters
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // On page load
+        window.onload = () => {
+            userEmail = getQueryParam('email');
+            if (userEmail) {
+                emailDisplay.textContent = userEmail;
+                unsubscribedEmailDisplay.textContent = userEmail;
+                missingEmailMessage.classList.add('hidden');
+                actionButtonContainer.classList.remove('hidden');
+            } else {
+                emailDisplay.textContent = 'No email address provided.';
+                emailDisplay.classList.add('text-amber-400');
+                missingEmailMessage.classList.remove('hidden');
+                actionButtonContainer.classList.add('hidden'); // Hide button if no email
+            }
+        };
+
+        unsubscribeButton.addEventListener('click', async () => {
+            if (!userEmail) {
+                alert('No email address found. Please use the link from your email.');
+                return;
+            }
+
+            if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbw7gE6mtqx3gQ0nkqg5gT8AgyQsae5yU9mjAlZyYKtSr-2dmI1iodKZMApjN1yoNYSr/exec') {
+                alert('Configuration error: The script URL is not set. Please contact support or the site administrator.');
+                // For development, you might want to show the error state directly
+                initialView.classList.add('hidden');
+                feedbackView.classList.remove('hidden');
+                loadingState.classList.add('hidden');
+                successState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+                errorMessage.textContent = 'The unsubscribe service is not configured correctly. (SCRIPT_URL missing)';
+                return;
+            }
+            
+            // Show loading state
+            initialView.classList.add('hidden');
+            feedbackView.classList.remove('hidden');
+            loadingState.classList.remove('hidden');
+            successState.classList.add('hidden');
+            errorState.classList.add('hidden');
+
+            try {
+                // Construct form data
+                const formData = new FormData();
+                formData.append('email', userEmail);
+                // You can add more parameters here if needed by your script, e.g., listId
+                // formData.append('listId', 'newsletter');
+
+
+                // Make the request to Google Apps Script
+                // Using POST with 'application/x-www-form-urlencoded' style payload
+                // which is easily handled by e.parameter in Apps Script
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors', // Required for cross-origin requests to Apps Script web apps
+                                  // but Apps Script itself needs to be configured for this (it usually is by default for ContentService)
+                    // To send as x-www-form-urlencoded, you'd typically build a query string
+                    // or use URLSearchParams. For simplicity with fetch and FormData,
+                    // Apps Script can also handle multipart/form-data if not specifying Content-Type,
+                    // or you can explicitly set it if your Apps Script expects it.
+                    // Let's try sending it as a query string in the body for `e.parameter`
+                    // This is a common pattern for simple POSTs to Apps Script
+                    body: new URLSearchParams(formData) // This will send as application/x-www-form-urlencoded
+                });
+
+                if (!response.ok) {
+                    // Try to get error details from the response if possible
+                    let errorDetails = `HTTP error! status: ${response.status}`;
+                    try {
+                        const errorResult = await response.json();
+                        errorDetails = errorResult.message || errorResult.error || errorDetails;
+                    } catch (e) { /* Ignore if response is not JSON */ }
+                    throw new Error(errorDetails);
+                }
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    loadingState.classList.add('hidden');
+                    successState.classList.remove('hidden');
+                } else {
+                    throw new Error(result.message || 'An unknown error occurred.');
+                }
+
+            } catch (error) {
+                console.error('Unsubscribe error:', error);
+                loadingState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+                errorMessage.textContent = error.message || 'Failed to connect to the unsubscribe service.';
+            }
+        });
+    </script>
+</body>
+</html>
